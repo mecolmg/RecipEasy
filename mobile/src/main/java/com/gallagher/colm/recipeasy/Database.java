@@ -41,6 +41,7 @@ public class Database {
 
         sharedPref = mainActivity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         prefEditor = mainActivity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        retrieveDataFromStorage();
     }
 
     public void setFavorite(String fav, Set<String> ingredients, Set<String> directions){
