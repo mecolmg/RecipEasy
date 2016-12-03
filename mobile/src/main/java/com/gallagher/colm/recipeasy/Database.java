@@ -59,13 +59,17 @@ public class Database {
         return ingredientsMap.get(fav);
     }
 
-    public boolean removeFavorite(String fav){
+    public void removeFavorite(String fav){
         Object check;
         Object check2;
         check = directionsMap.remove(fav);
         check2 = ingredientsMap.remove(fav);
+        if(check != null && check2 != null){
+            prefEditor.remove(fav);
+            prefEditor.remove(fav + INGREDIENTS_SUFIX_KEY);
+            prefEditor.remove(fav + DIRECTIONS_SUFIX_KEY);
+        }
 
-        return (check != null && check2 != null);
     }
 
     public void storeDataInStorage(){
