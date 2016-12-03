@@ -69,6 +69,7 @@ public class Database {
             prefEditor.remove(fav);
             prefEditor.remove(fav + INGREDIENTS_SUFIX_KEY);
             prefEditor.remove(fav + DIRECTIONS_SUFIX_KEY);
+            prefEditor.commit();
         }
 
     }
