@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences;
@@ -27,20 +28,20 @@ public class Database {
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor prefEditor;
-    public MainActivity mainActivity;
+    public Activity activity;
     //public Context context;
     public ArrayList<String> favoritesList; //name of favorite recipies
     public HashMap<String, Set<String>> ingredientsMap; //list of ingredients that can be retrieved using favorites name
     public HashMap<String, Set<String>> directionsMap; //list of directions that can be retrieved using favorites name
 
-    public Database(MainActivity mainActivity){
+    public Database(Activity activity){
         favoritesList = new ArrayList<>();
         ingredientsMap = new HashMap<>();
         directionsMap = new HashMap<>();
-        this.mainActivity = mainActivity;
+        this.activity = activity;
 
-        sharedPref = mainActivity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefEditor = mainActivity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        sharedPref = activity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        prefEditor = activity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
         retrieveDataFromStorage();
     }
 
