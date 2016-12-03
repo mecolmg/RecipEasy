@@ -2,6 +2,8 @@ package com.gallagher.colm.recipeasy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
@@ -18,13 +20,18 @@ public class Database {
 
 
     public static final String PREFS_NAME = "recipez";
+    public static final String FAV_LIST_KEY = "favorites";
+    public static final String INGREDIENTS_SUFIX_KEY = "ingredients";
+    public static final String DIRECTIONS_SUFIX_KEY = "directions";
+    //public static final String  = "recipez";
+
     SharedPreferences sharedPref;
     SharedPreferences.Editor prefEditor;
     public MainActivity mainActivity;
     //public Context context;
     public ArrayList<String> favoritesList; //name of favorite recipies
-    public HashMap<String, ArrayList<String>> ingredientsMap; //list of ingredients that can be retrieved using favorites name
-    public HashMap<String, ArrayList<String>> directionsMap; //list of directions that can be retrieved using favorites name
+    public HashMap<String, Set<String>> ingredientsMap; //list of ingredients that can be retrieved using favorites name
+    public HashMap<String, Set<String>> directionsMap; //list of directions that can be retrieved using favorites name
 
     public Database(MainActivity mainActivity){
         favoritesList = new ArrayList<>();
@@ -36,18 +43,18 @@ public class Database {
         prefEditor = mainActivity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
     }
 
-    public void setFavorite(String fav, ArrayList<String> ingredients, ArrayList<String> directions){
+    public void setFavorite(String fav, Set<String> ingredients, Set<String> directions){
         favoritesList.add(fav);
         ingredientsMap.put(fav, ingredients);
         directionsMap.put(fav, directions);
 
     }
 
-    public ArrayList<String> getDirections(String fav){
+    public Set<String> getDirections(String fav){
         return directionsMap.get(fav);
     }
 
-    public ArrayList<String> getIngredients(String fav){
+    public Set<String> getIngredients(String fav){
         return ingredientsMap.get(fav);
     }
 
@@ -61,11 +68,25 @@ public class Database {
     }
 
     public void storeDataInStorage(){
+        Set<String> favoritesSet = new HashSet<>(favoritesList);
+        prefEditor.putStringSet(FAV_LIST_KEY, favoritesSet);
+        for(String favorite : favoritesList){
+            Set<String> ingredientSet = new HashSet<>(ingredientsMap.get(favorite));
+            prefEditor.putStringSet(favorite+INGREDIENTS_SUFIX_KEY, ingredientSet);
+            Set<String> directionSet = new HashSet<>(directionsMap.get(favorite));
+            prefEditor.putStringSet(favorite+DIRECTIONS_SUFIX_KEY, directionSet);
+        }
 
-
+        prefEditor.commit();
     }
 
     public void retrieveDataFromStorage(){
+        Set<String> favoritesSet = sharedPref.getStringSet(FAV_LIST_KEY, null);
+        for(String fav : favoritesSet){
+            favoritesList.add(fav);
+            ingredientsMap.put(fav, sharedPref.getStringSet((fav+INGREDIENTS_SUFIX_KEY), null));
+            directionsMap.put(fav, sharedPref.getStringSet((fav+DIRECTIONS_SUFIX_KEY), null));
+        }
 
     }
 
