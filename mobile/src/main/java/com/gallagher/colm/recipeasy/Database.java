@@ -60,12 +60,12 @@ public class Database {
         return (check != null && check2 != null);
     }
 
-    public void storeData(){
-        //sharedPref.
+    public void storeDataInStorage(){
+
 
     }
 
-    public void setDataLocally(){
+    public void retrieveDataFromStorage(){
 
     }
 
