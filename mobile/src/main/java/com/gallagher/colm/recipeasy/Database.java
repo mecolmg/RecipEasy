@@ -89,10 +89,15 @@ public class Database {
 
     public void retrieveDataFromStorage(){
         Set<String> favoritesSet = sharedPref.getStringSet(FAV_LIST_KEY, null);
-        for(String fav : favoritesSet){
-            favoritesList.add(fav);
-            ingredientsMap.put(fav, sharedPref.getStringSet((fav+INGREDIENTS_SUFIX_KEY), null));
-            directionsMap.put(fav, sharedPref.getStringSet((fav+DIRECTIONS_SUFIX_KEY), null));
+        if(favoritesSet != null) {
+
+
+            for (String fav : favoritesSet) {
+                favoritesList.add(fav);
+                ingredientsMap.put(fav, sharedPref.getStringSet((fav + INGREDIENTS_SUFIX_KEY), null));
+                directionsMap.put(fav, sharedPref.getStringSet((fav + DIRECTIONS_SUFIX_KEY), null));
+            }
+
         }
 
     }
