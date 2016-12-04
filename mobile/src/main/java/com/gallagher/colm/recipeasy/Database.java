@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,22 +23,19 @@ public class Database {
 
     public static final String PREFS_NAME = "recipez";
     public static final String FAV_LIST_KEY = "favorites";
-    public static final String INGREDIENTS_SUFIX_KEY = "ingredients";
-    public static final String DIRECTIONS_SUFIX_KEY = "directions";
-    //public static final String  = "recipez";
 
     SharedPreferences sharedPref;
     SharedPreferences.Editor prefEditor;
-    public Activity activity;
-    //public Context context;
-    public ArrayList<String> favoritesList; //name of favorite recipies
-    public HashMap<String, Set<String>> ingredientsMap; //list of ingredients that can be retrieved using favorites name
-    public HashMap<String, Set<String>> directionsMap; //list of directions that can be retrieved using favorites name
 
-    public Database(Activity activity){
+    public Activity activity;
+
+    public ArrayList<String> favoritesList; //keys for all of the jsonobjects
+    public HashMap<String, JSONObject> jSONMap; //contains all json objects with their cooresponding keys from favorites list
+
+    public Database(Activity activity) throws org.json.JSONException{
         favoritesList = new ArrayList<>();
-        ingredientsMap = new HashMap<>();
-        directionsMap = new HashMap<>();
+        jSONMap = new HashMap<>();
+
         this.activity = activity;
 
         sharedPref = activity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -45,73 +43,60 @@ public class Database {
         retrieveDataFromStorage();
     }
 
-    public void setFavorite(String fav, Set<String> ingredients, Set<String> directions){
-        favoritesList.add(fav);
-        ingredientsMap.put(fav, ingredients);
-        directionsMap.put(fav, directions);
-
-    }
-
-    public Set<String> getDirections(String fav){
-        return directionsMap.get(fav);
-    }
-
-    public Set<String> getIngredients(String fav){
-        return ingredientsMap.get(fav);
-    }
-
-    public void removeFavorite(String fav){
-        Object check;
-        Object check2;
-        check = directionsMap.remove(fav);
-        check2 = ingredientsMap.remove(fav);
-        if(check != null && check2 != null){
-            prefEditor.remove(fav);
-            prefEditor.remove(fav + INGREDIENTS_SUFIX_KEY);
-            prefEditor.remove(fav + DIRECTIONS_SUFIX_KEY);
-            prefEditor.commit();
+    public void storeJSONObject(JSONObject jObj) throws org.json.JSONException{
+        String keyId = jObj.getString("id");
+        if(!favoritesList.contains(keyId)){
+            favoritesList.add(keyId);
         }
-
-    }
-
-    public void storeDataInStorage(){
-        Set<String> favoritesSet = new HashSet<>(favoritesList);
-        prefEditor.putStringSet(FAV_LIST_KEY, favoritesSet);
-        for(String favorite : favoritesList){
-            Set<String> ingredientSet = new HashSet<>(ingredientsMap.get(favorite));
-            prefEditor.putStringSet(favorite+INGREDIENTS_SUFIX_KEY, ingredientSet);
-            Set<String> directionSet = new HashSet<>(directionsMap.get(favorite));
-            prefEditor.putStringSet(favorite+DIRECTIONS_SUFIX_KEY, directionSet);
+        jSONMap.put(keyId, jObj);
+        String value = jObj.toString();
+        if(!sharedPref.contains(keyId)) {
+            prefEditor.putString(keyId, value);
         }
-
+        if(sharedPref.contains(FAV_LIST_KEY)){
+            prefEditor.remove(FAV_LIST_KEY);
+            prefEditor.putStringSet(FAV_LIST_KEY, new HashSet<>(favoritesList));
+        }
         prefEditor.commit();
     }
 
-    public void retrieveDataFromStorage(){
+    public JSONObject getJSONObject (String keyId) throws org.json.JSONException{
+        return jSONMap.get(keyId);
+    }
+
+    public void removeJSONObject(String keyId){
+        if(jSONMap.containsKey(keyId)){
+            jSONMap.remove(keyId);
+        }
+        if(sharedPref.contains(keyId)){
+            prefEditor.remove(keyId);
+        }
+        if(favoritesList.contains(keyId)){
+            favoritesList.remove(keyId);
+        }
+        prefEditor.commit();
+    }
+
+    public ArrayList<String> getFavoritesList(){
+        return favoritesList;
+    }
+
+    public void retrieveDataFromStorage() throws org.json.JSONException{
         Set<String> favoritesSet = sharedPref.getStringSet(FAV_LIST_KEY, null);
         if(favoritesSet != null) {
-
-
             for (String fav : favoritesSet) {
                 favoritesList.add(fav);
-                ingredientsMap.put(fav, sharedPref.getStringSet((fav + INGREDIENTS_SUFIX_KEY), null));
-                directionsMap.put(fav, sharedPref.getStringSet((fav + DIRECTIONS_SUFIX_KEY), null));
+                jSONMap.put(fav, new JSONObject(sharedPref.getString(fav, null)));
             }
 
         }
-
     }
 
     public void printDatabase(){ //method for testing the functionality of the database
         System.out.println("printing info. from the database...");
         for(String fav : favoritesList){
             System.out.println(fav);
-            for(String ingredient : ingredientsMap.get(fav)){
-                System.out.println(ingredient);
-            }
-            for(String direction : directionsMap.get(fav)){
-                System.out.println(direction);
-            }
+            System.out.println((jSONMap.get(fav)).toString());
         }
     }
 
